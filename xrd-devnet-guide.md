@@ -20,7 +20,7 @@ Let's start by configuring our host by downloading and running the script:
 
 1. `git clone https://github.com/ios-xr/xrd-tools`
 2. `cd xrd-tools`
-3. `pip3 -r requirements.txt`
+3. `pip3 install -r requirements.txt`
 4. `cd scripts`
 5. `./host-check`
 
