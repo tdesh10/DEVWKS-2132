@@ -19,13 +19,15 @@ This script is an extremely handy tool to determine the suitability of the Host 
 Let's start by configuring our host by downloading and running the script:
 
 1. `git clone https://github.com/ios-xr/xrd-tools`
-2. `cd xrd-tools/scripts`
-3. `./host-check`
+2. `cd xrd-tools`
+3. `pip3 -r requirements.txt`
+4. `cd scripts`
+5. `./host-check`
 
 Output:
 
 ```bash
-[ec2-user@ip-172-31-42-213 scripts]$ ./host-check
+[ec2-user@ip-172-31-42-213 scripts] ./host-check
 ==============================
 Platform checks
 ==============================
@@ -219,7 +221,7 @@ Now we can build our docker compose file and launch our topology
 2. Launch our topology with docker compose
 		
 ```bash
-$ docker compose up
+$ docker compose up -d
 [+] Running 8/8
 ✔ Network simple-bgp_xrd-2-dest    Created                                                                                                    3.0s 
 ✔ Network simple-bgp_source-xrd-1  Created                                                                                                    2.6s 
@@ -245,7 +247,7 @@ afa0e3181070   alpine:3.15                      "/bin/sh -c 'ip rout…"   5 min
 
 We can attach to `xr-1` and verify that we have a bgp session
 
-`$ docker attach xr-1`
+`docker attach xr-1`
 
 And once we login to our router, we can check the status of our bgp session
 
@@ -296,77 +298,28 @@ kind load docker-image ios-xr/xrd-vrouter:7.8.2 -n xrd-cluster
 ```
 
 
-### Add Helm Repo and deploy one xrd-vrouter
+### Add Helm Repo and Deploy a Multi Router topology with an IGP
 
 ```
 helm repo add xrd-helm https://ios-xr.github.io/xrd-helm
 ```
 
-Create simple yaml values file:
-
-```
-config:
-  ascii: |
-    hostname xrd
-  password: cisco123
-  username: cisco
-cpu:
-  cpuset: 8-9
-image:
-  pullPolicy: IfNotPresent
-  repository: docker.io/ios-xr/xrd-vrouter
-  tag: 7.8.2
-```
-Now make our first helm release:
-
-```
-helm install single xrd-helm/xrd-vrouter -f values.yaml
-```
-
-We can see our running container is up
-
-```
-$ kubectl get pods -o wide
-NAME                   READY   STATUS    RESTARTS   AGE    IP           NODE                 NOMINATED NODE   READINESS GATES
-single-xrd-vrouter-0   1/1     Running   0          149m   10.244.2.2   xrd-cluster-worker   <none>           <none>
-```
-
-And we can also view our xr logs: 
-
-```
-$ kubectl logs single-xrd-vrouter-0 
-```
-
-And exec into the container:
-
-```
-$ kubectl exec -it single-xrd-vrouter-0 -- xr
-```
-
-Finally, we can uninstall our release, which will delete our pods as well as any other resources we may have created during this deployment
-
-```
-$ helm uninstall single
-```
-
-### Deploy a Multi Router topology with an IGP
-
 Take a look at the custom chart located in **multi-xrd-helm/**
 First apply this smart devices config so we can enable pci passthrough:
 ```
-$ kubectl apply -f devices.yml
+kubectl apply -f devices.yml
 ```
 
 Next, to deploy this topology we will install this chart with:
 
 ```
-$ helm install multi multi-xrd-helm/
+helm install multi multi-xrd-helm/
 ```
 
 Once again, let's view our pods and see which nodes they're running in:
 
 ```
-$ kubectl get pods -o wide
+kubectl get pods -o wide
 NAME          READY   STATUS    RESTARTS   AGE   IP           NODE                  NOMINATED NODE   READINESS GATES
 multi-xrd1-0   1/1     Running   0          28m   172.17.0.3   xrd-cluster-worker    <none>           <none>
 multi-xrd2-0   1/1     Running   0          28m   172.17.0.5   xrd-cluster-worker2   <none>           <none>
@@ -376,7 +329,7 @@ multi-xrd3-0   1/1     Running   0          28m   172.17.0.2   xrd-cluster-worke
 And we can exec into our pods just like before:
 
 ```
-$ kubectl exec -it multi-xrd1-0 -- xr
+kubectl exec -it multi-xrd1-0 -- xr
 ```
 
 Now let's upgrade our helm release, and update the startup config of our XRd devices. This new config will run OSPF between or XRds. However, in a cloud environment, we cannot run IGPs directly over an interface, so we will have to do it over GRE tunnels.
