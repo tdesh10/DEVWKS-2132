@@ -18,11 +18,11 @@ This script is an extremely handy tool to determine the suitability of the Host 
 
 Let's start by configuring our host by downloading and running the script:
 
-1. `git clone https://github.com/ios-xr/xrd-tools`
-2. `cd xrd-tools`
-3. `pip3 install -r requirements.txt`
-4. `cd scripts`
-5. `./host-check`
+	git clone https://github.com/ios-xr/xrd-tools`
+	cd xrd-tools
+	pip3 install -r requirements.txt
+	cd scripts
+	./host-check
 
 Output:
 
@@ -132,7 +132,7 @@ PASS -- Shared memory pages max size (17179869184.0 GiB)
 #### System Kernel Parameters
 Let's start by modifying `/etc/sysctl.conf`
 
-`sudo vi /etc/sysctl.conf`
+	sudo vi /etc/sysctl.conf
 
 ```bash
 # /etc/sysctl.d/ and put new settings there. To override
@@ -174,26 +174,29 @@ GRUB_X86_USE_32BIT="true"
 
 Now apply these new settings by:
 
-1. `sudo grub2-mkconfig -o /boot/grub2/grub.cfg`
-2. `sudo reboot`
+	sudo grub2-mkconfig -o /boot/grub2/grub.cfg
+	sudo reboot
 
 After running the `host-check` script again, we see that both platforms are supported on our host
 
 ## XRd on Docker
 ### Loading the XRd images
 First let's start the docker daemon:
-`sudo systemctl start docker`
+```bash
+sudo systemctl start docker
+```
 
 Then we are able to load our XRd images from tarballs:
 
 ```bash
-[ec2-user@ip-172-31-42-213 ~]$ docker load -i xrd-control-plane-container-x64.dockerv1.tgz 
-a04ec920c675: Loading layer [==================================================>]  1.175GB/1.175GB
-Loaded image: ios-xr/xrd-control-plane:7.9.1
+docker load -i xrd-control-plane-container-x64.dockerv1.tgz
+docker load -i xrd-vrouter-container-x64.dockerv1.tgz
 ```
 
-```bash
-[ec2-user@ip-172-31-42-213 ~]$ docker load -i xrd-vrouter-container-x64.dockerv1.tgz
+Outputs:
+```
+a04ec920c675: Loading layer [==================================================>]  1.175GB/1.175GB
+Loaded image: ios-xr/xrd-control-plane:7.9.1
 887387959b52: Loading layer [==================================================>]  1.217GB/1.217GB
 Loaded image: ios-xr/xrd-vrouter:7.8.2
 ```
@@ -212,14 +215,22 @@ The `xr-compose` script is a wrapper around docker-compose. In addition to the g
 
 The `xr-tools` repo comes with several sample xr-compose topologies. Let's navigate to `~/xrd-tools/samples/xr_compose_topos/simple-bgp/`
 
+	cd ~/xrd-tools/samples/xr_compose_topos/simple-bgp/
+
 Let's take a closer look at `docker-compose.xr.yml`, `xrd-1_xrconf.cfg`, `xrd-2_xrconf.cfg`
 
-Now we can build our docker compose file and launch our topology
+Now we can build our docker compose file and launch our topology.
 
-1. `../../../scripts/xr-compose -f docker-compose.xr.yml -i ios-xr/xrd-control-plane:7.9.1` to build our docker compose file
+1. Build our docker compose file
+	```bash
+	../../../scripts/xr-compose -f docker-compose.xr.yml -i ios-xr/xrd-control-plane:7.9.1
+ 	```
 
 2. Launch our topology with docker compose
-		
+	```bash
+   	docker compose up -d
+ 	```
+Output:	
 ```bash
 $ docker compose up -d
 [+] Running 8/8
@@ -247,7 +258,7 @@ afa0e3181070   alpine:3.15                      "/bin/sh -c 'ip rout…"   5 min
 
 We can attach to `xr-1` and verify that we have a bgp session
 
-`docker attach xr-1`
+	docker attach xr-1
 
 And once we login to our router, we can check the status of our bgp session
 
@@ -320,6 +331,9 @@ Once again, let's view our pods and see which nodes they're running in:
 
 ```
 kubectl get pods -o wide
+```
+Output:
+```
 NAME          READY   STATUS    RESTARTS   AGE   IP           NODE                  NOMINATED NODE   READINESS GATES
 multi-xrd1-0   1/1     Running   0          28m   172.17.0.3   xrd-cluster-worker    <none>           <none>
 multi-xrd2-0   1/1     Running   0          28m   172.17.0.5   xrd-cluster-worker2   <none>           <none>
