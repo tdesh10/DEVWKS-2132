@@ -18,7 +18,7 @@ This script is an extremely handy tool to determine the suitability of the Host 
 
 Let's start by configuring our host by downloading and running the script:
 
-	git clone https://github.com/ios-xr/xrd-tools`
+	git clone https://github.com/ios-xr/xrd-tools
 	cd xrd-tools
 	pip3 install -r requirements.txt
 	cd scripts
