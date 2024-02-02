@@ -354,7 +354,7 @@ To do this, we'll create a new values file that includes only the parameters tha
 **igp-values.yaml**
 
 ```
-echo "xrd1:
+xrd1:
   config:
     ascii: |
       hostname xrd1
@@ -419,7 +419,7 @@ xrd3:
        area 0
         interface tunnel-ip3
         !
-      !" > igp-values.yaml
+      !
 ```
 
 And we can modify our deployment like so:
