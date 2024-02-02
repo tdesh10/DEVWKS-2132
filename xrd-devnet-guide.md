@@ -189,6 +189,7 @@ sudo systemctl start docker
 Then we are able to load our XRd images from tarballs:
 
 ```bash
+cd ~
 docker load -i xrd-control-plane-container-x64.dockerv1.tgz
 docker load -i xrd-vrouter-container-x64.dockerv1.tgz
 ```
