@@ -132,15 +132,9 @@ PASS -- Shared memory pages max size (17179869184.0 GiB)
 #### System Kernel Parameters
 Let's start by modifying `/etc/sysctl.conf`
 
-	sudo vi /etc/sysctl.conf
 
 ```bash
-# /etc/sysctl.d/ and put new settings there. To override
-# only specific settings, add a file with a lexically later
-# name in /etc/sysctl.d/ and put new settings there.
-#
-# For more information, see sysctl.conf(5) and sysctl.d(5).
-fs.inotify.max_user_watches=524288
+sudo bash -c 'cat << EOF >> /etc/sysctl.conf
 fs.inotify.max_user_instances=64000
 net.core.netdev_max_backlog=300000
 net.core.optmem_max=67108864
@@ -152,25 +146,17 @@ net.ipv4.udp_mem=1124736 10000000 67108864
 kernel.sched_rt_runtime_us=-1
 net.bridge.bridge-nf-call-iptables=0
 vm.max_map_count=524288
+EOF'
 ```
 
 #### IOMMU and HugePages Settings
 
 Next, for XRd vRouter to work, enable iommu and Hugepages for the Host machine by adding the `GRUB_CMDLINE_LINUX` line to the end of the file
 
-<div class="highlighter-rouge">
-<pre class="highlight">
-<code style="white-space: pre;">
-[ec2-user@ip-172-31-42-213 scripts]$ cat /etc/default/grub
-GRUB_CMDLINE_LINUX_DEFAULT="console=tty0 console=ttyS0,115200n8 net.ifnames=0 biosdevname=0 nvme_core.io_timeout=4294967295 rd.emergency=poweroff rd.shell=0"
-GRUB_TIMEOUT=0
-GRUB_DISABLE_RECOVERY="true"
-GRUB_TERMINAL="ec2-console"
-GRUB_X86_USE_32BIT="true"
-<mark>GRUB_CMDLINE_LINUX="intel_iommu=on iommu=pt default_hugepagesz=1G hugepagesz=1G hugepages=9"</mark>
-</code>
-</pre>
-</div>
+	sudo bash -c 'cat << EOF >> /etc/default/grub
+	GRUB_CMDLINE_LINUX="intel_iommu=on iommu=pt default_hugepagesz=1G hugepagesz=1G hugepages=9"
+	EOF'
+
 
 Now apply these new settings by:
 
@@ -179,6 +165,8 @@ Now apply these new settings by:
 
 After running the `host-check` script again, we see that both platforms are supported on our host
 
+	cd ~/xrd-tools/scripts
+ 	./host-check
 ## XRd on Docker
 ### Loading the XRd images
 First let's start the docker daemon:
@@ -270,6 +258,7 @@ Wed May 17 01:05:12.904 UTC
 Neighbor         Spk    AS  Description                         Up/Down  NBRState
 10.2.1.3          0   100                                      00:09:31 Established 
 ```
+To **exit** from the router use the escape sequence: `^P^Q`
 
 Finally, we can attach to the Alpine Linux container `source` and ping `dest`, having our packets routed through `xr-1` and `xr-2`
 
@@ -288,13 +277,13 @@ round-trip min/avg/max = 2.248/2.613/3.539 ms
 ```
 
 ## XRd on Kubernetes
-Create a kind cluster using our custom config file, this specifies number of control plane and worker nodes
-
+Create a kind cluster using our custom config file, this specifies number of control plane and worker nodes.
 ```
+cd ~
 kind create cluster --config=kind.yml
 ```
 
-Once that command is complete, we should use kubectl to use our cluster
+Once that command is complete, we should use kubectl to interact our cluster
 
 ```
 kubectl cluster-info --context kind-xrd-cluster
@@ -354,6 +343,7 @@ To do this, we'll create a new values file that includes only the parameters tha
 **igp-values.yaml**
 
 ```
+sudo bash -c 'cat << EOF > igp-values.yaml
 xrd1:
   config:
     ascii: |
@@ -420,6 +410,7 @@ xrd3:
         interface tunnel-ip3
         !
       !
+EOF'
 ```
 
 And we can modify our deployment like so:
