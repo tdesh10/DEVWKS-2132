@@ -1,9 +1,10 @@
 # XRd Devnet Workshop
 ## Connecting to the Host Machine
-1. Open webex and download `xrd-devnet.pem` that was sent to your webex space
+1. Download `xrd-devnet.pem` from this git repo
 2. Open an ubuntu terminal shell.
 3. Copy the .pem file to your home directory: `cp ~/Downloads/xrd-devnet.pem ~/`
-4. Connect to the host machine using the Ip address in your webex space. The command will be similar to `ssh -i "xrd-devnet.pem" ec2-user@<hostname>`. 
+4. Change permissions on PEM file: `chmod 400 xrd-devnet.pem`
+5. Connect to the host machine using the IP address on the sheet in front of you. The command will be similar to `ssh -i "xrd-devnet.pem" ec2-user@<hostname>`. 
 
 
 
