@@ -4,7 +4,8 @@
 2. Open an ubuntu terminal shell.
 3. Copy the .pem file to your home directory: `cp ~/Downloads/xrd-devnet.pem ~/`
 5. Change permissions on PEM file: `chmod 400 ~/xrd-devnet.pem`
-6. Connect to the host machine using the IP address on the sheet in front of you. The command will be similar to `ssh -i "xrd-devnet.pem" ec2-user@<hostname>`. 
+6. Change ssh permissions on host machine: `chmod 600 .ssh/config`
+7. Connect to the host machine using the IP address on the sheet in front of you. The command will be similar to `ssh -i "xrd-devnet.pem" ec2-user@<hostname>`. 
 
 
 
